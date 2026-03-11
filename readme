@@ -1,0 +1,25 @@
+// QuNews is a news application which will provide short news for quick view.
+
+// Dagger
+// Glide
+// Coroutine
+// flows
+// Retrofit
+// Sqlite
+//
+
+
+Structure
+
+Qunews --
+         -data
+            --model
+            --repository
+            --api
+            --local
+            --remote
+         -domain
+            --model
+            --repository
+            --usecase
+         -ui
