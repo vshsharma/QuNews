@@ -1,7 +1,5 @@
 package com.miva.qunews
 
-import com.miva.qunews.domain.model.NewsArticle
-
 sealed interface ApiNewsResult<out T> {
     data class Loading<out T>(val data: T? = null) : ApiNewsResult<T>
 
