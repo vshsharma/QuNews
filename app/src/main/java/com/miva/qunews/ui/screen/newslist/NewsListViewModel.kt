@@ -28,6 +28,7 @@ import kotlinx.coroutines.supervisorScope
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
+// This is the ViewModel for the NewsListScreen. It handles loading news articles, refreshing the list, navigating to the detail screen, and saving articles. It uses a StateFlow to manage the UI state and a Channel to send one-time effects like navigation and showing snackbars. The ViewModel is annotated with @HiltViewModel to enable dependency injection with Hilt.
 @HiltViewModel
 class NewsListViewModel @Inject constructor(
     private val getNewsUseCase: NewsUseCase,
