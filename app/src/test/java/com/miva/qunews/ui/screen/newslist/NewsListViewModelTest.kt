@@ -54,7 +54,7 @@ class NewsListViewModelTest {
     @Test
     fun loadNews_emits_articles_on_success() = runTest {
         val articles = listOf(dummyArticle)
-        coEvery { newsUseCase(false) } returns flowOf(ApiNewsResult.Success(articles))
+        coEvery { newsUseCase(true) } returns flowOf(ApiNewsResult.Success(articles))
 
         viewModel.handleEvent(NewsListContract.Event.LoadNews)
 
@@ -69,7 +69,7 @@ class NewsListViewModelTest {
 
     @Test
     fun `loadNews emits error`() = runTest{
-        coEvery { newsUseCase(false) } returns flowOf(ApiNewsResult.Error("Something went wrong"))
+        coEvery { newsUseCase(true) } returns flowOf(ApiNewsResult.Error("Something went wrong"))
 
         viewModel.handleEvent(NewsListContract.Event.LoadNews)
 
