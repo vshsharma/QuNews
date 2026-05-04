@@ -2,9 +2,9 @@ package com.miva.qunews.data.repository
 
 import com.miva.qunews.ApiNewsResult
 import com.miva.qunews.data.api.NewsApi
-import com.miva.qunews.data.entity.ArticleDto
 import com.miva.qunews.data.local.NewsDao
-import com.miva.qunews.data.local.entity.NewsEntity
+import com.miva.qunews.data.mapper.toNewsArticle
+import com.miva.qunews.data.mapper.toNewsEntity
 import com.miva.qunews.domain.model.NewsArticle
 import com.miva.qunews.domain.repository.NewsRepository
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +23,6 @@ class NewsRepositoryImpl(
     override fun getNews(fetchFromRemote: Boolean): Flow<ApiNewsResult<List<NewsArticle>>> = flow {
         emit(ApiNewsResult.Loading())
 
-        // Get initial cached data (don't collect, just get first emission)
         val localArticles = dao.getAllNews().first()
         val cachedData = localArticles.map { it.toNewsArticle() }
 
@@ -35,33 +34,30 @@ class NewsRepositoryImpl(
         println("Vishal fetchFromRemote: $fetchFromRemote")
         if (fetchFromRemote) {
             try {
-                println("Vishal apikey: $apiKey")
                 val remoteArticles = api.getTopHeadlines(apiKey = apiKey)
                 dao.clearAll()
                 dao.insertArticles(
-                    remoteArticles.articles.map { it.toNewsEntity() }
-                )
+                    remoteArticles.articles.map { it.toNewsEntity() })
             } catch (_: HttpException) {
                 emit(
                     ApiNewsResult.Error(
                         message = "Oops, something went wrong!",
-                        data = dao.getAllNews().map { entities ->
-                            entities.map { it.toNewsArticle() }
-                        }.let { null }
-                    )
-                )
+                    data = dao.getAllNews().map { entities ->
+                        entities.map { it.toNewsArticle() }
+                    }.let { null }))
             } catch (_: IOException) {
                 emit(
                     ApiNewsResult.Error(
                         message = "Couldn't reach server, check your internet connection.",
-                        data = dao.getAllNews().map { entities ->
-                            entities.map { it.toNewsArticle() }
-                        }.let { null }
-                    )
-                )
+                    data = dao.getAllNews().map { entities ->
+                        entities.map { it.toNewsArticle() }
+                    }.let { null }))
             }
+        } else if (cachedData.isEmpty()) {
+            emit(
+                ApiNewsResult.Error(
+                message = "No data found, check your internet connection."))
         }
-
         // Emit fresh data from database
         dao.getAllNews().collect { entities ->
             emit(ApiNewsResult.Success(entities.map { it.toNewsArticle() }))
@@ -99,46 +95,5 @@ class NewsRepositoryImpl(
 
     override suspend fun getArticleByUrl(url: String) : NewsArticle?{
         return dao.getArticleByUrl(url)?.toNewsArticle()
-    }
-
-    private fun ArticleDto.toNewsEntity(): NewsEntity {
-        return NewsEntity(
-            url = url,
-            sourceName = source?.name ?: "Unknown",
-            author = author,
-            title = title,
-            description = description,
-            urlToImage = urlToImage,
-            publishedAt = publishedAt,
-            content = content
-        )
-    }
-
-    private fun NewsEntity.toNewsArticle(): NewsArticle {
-        return NewsArticle(
-            url = url,
-            sourceName = sourceName,
-            author = author,
-            title = title,
-            description = description,
-            urlToImage = urlToImage,
-            publishedAt = publishedAt,
-            content = content,
-            isSaved = isSaved
-        )
-    }
-
-    private fun NewsArticle.toNewsEntity(): NewsEntity {
-        return NewsEntity(
-            url = url,
-            sourceName = sourceName,
-            author = author,
-            title = title,
-            description = description,
-            urlToImage = urlToImage,
-            publishedAt = publishedAt,
-            content = content,
-            isSaved = isSaved
-        )
     }
 }

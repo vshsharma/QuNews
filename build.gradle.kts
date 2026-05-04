@@ -5,4 +5,5 @@ plugins {
     id("com.google.dagger.hilt.android") version "2.59.2" apply false
     id("com.google.devtools.ksp") version "2.3.5" apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "2.3.10" apply false
+    id("de.mannodermaus.android-junit5") version "2.0.1" apply false
 }

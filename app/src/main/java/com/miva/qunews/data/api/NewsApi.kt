@@ -1,6 +1,6 @@
 package com.miva.qunews.data.api
 
-import com.miva.qunews.data.entity.NewsResponse
+import com.miva.qunews.data.remote.dto.NewsResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -11,7 +11,7 @@ interface NewsApi {
         @Query("country") country: String = "us",
         @Query("apiKey") apiKey: String,
         @Query("page") page: Int = 1,
-        @Query("pageSize") pageSize: Int = 20
+        @Query("pageSize") pageSize: Int = 100
     ): NewsResponse
 
     @GET("everything")
@@ -19,6 +19,6 @@ interface NewsApi {
         @Query("q") query: String,
         @Query("apiKey") apiKey: String,
         @Query("page") page: Int = 1,
-        @Query("pageSize") pageSize: Int = 20
+        @Query("pageSize") pageSize: Int = 100
     ): NewsResponse
 }

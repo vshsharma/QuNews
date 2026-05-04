@@ -1,5 +1,7 @@
 package com.miva.qunews.domain.model
 
+import androidx.compose.runtime.Immutable
+
 data class NewsArticle(
     val url: String,
     val sourceName: String,

@@ -1,5 +1,8 @@
 package com.miva.qunews.ui.screen.newslist
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.miva.qunews.ApiNewsResult
@@ -7,7 +10,13 @@ import com.miva.qunews.domain.model.NewsArticle
 import com.miva.qunews.domain.usecase.NewsUseCase
 import com.miva.qunews.domain.usecase.SaveArticleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,14 +24,17 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.supervisorScope
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 @HiltViewModel
 class NewsListViewModel @Inject constructor(
     private val getNewsUseCase: NewsUseCase,
     private val saveArticleUseCase: SaveArticleUseCase
 ) : ViewModel() {
-
+    var isLoading by mutableStateOf(false)
+        private set
     private val _state = MutableStateFlow(NewsListContract.State())
     val state: StateFlow<NewsListContract.State> = _state.asStateFlow()
 
@@ -35,7 +47,7 @@ class NewsListViewModel @Inject constructor(
 
     fun handleEvent(event: NewsListContract.Event) {
         when (event) {
-            is NewsListContract.Event.LoadNews -> loadNews(false)
+            is NewsListContract.Event.LoadNews -> loadNews(true)
             is NewsListContract.Event.Refresh -> loadNews(true)
             is NewsListContract.Event.OnArticleClick -> navigateToDetail(event.article)
             is NewsListContract.Event.OnSaveArticle -> saveArticle(event.article)
@@ -44,7 +56,7 @@ class NewsListViewModel @Inject constructor(
 
     private fun loadNews(fetchFromRemote: Boolean) {
         viewModelScope.launch {
-            getNewsUseCase(fetchFromRemote).collectLatest { result ->
+             getNewsUseCase(fetchFromRemote).collectLatest { result ->
                 when (result) {
                     is ApiNewsResult.Loading -> {
                         _state.update {
@@ -58,7 +70,7 @@ class NewsListViewModel @Inject constructor(
                     is ApiNewsResult.Success -> {
                         _state.update {
                             it.copy(
-                                articles = result.data ?: emptyList(),
+                                articles = result.data,
                                 isLoading = false,
                                 isRefreshing = false,
                                 error = null
@@ -73,6 +85,7 @@ class NewsListViewModel @Inject constructor(
                                 error = result.message
                             )
                         }
+                        println("Vishal error: ${result.message}")
                         _effect.send(NewsListContract.Effect.ShowError(result.message ?: "Unknown error"))
                     }
                 }

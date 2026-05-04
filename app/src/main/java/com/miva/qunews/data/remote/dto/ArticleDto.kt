@@ -1,4 +1,4 @@
-package com.miva.qunews.data.entity
+package com.miva.qunews.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 

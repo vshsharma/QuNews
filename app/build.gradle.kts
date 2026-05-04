@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("de.mannodermaus.android-junit5")
 }
 
 android {
@@ -16,7 +17,14 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "NEWS_API_KEY", "\"c2e2adff1e864f51baa7ba093f5bef92\"")
+//        buildConfigField("String", "NEWS_API_KEY", "\"c2e2adff1e864f51baa7ba093f5bef92\"")
+//        buildConfigField("String", "BASE_URL", "\"https://newsapi.org/v2/\"")
+        val newsApiKey = (System.getenv("NEWS_API_KEY")
+            ?: project.findProperty("NEWS_API_KEY") as String?
+            ?: "DUMMY_NEWS_API_KEY")
+            .replace("\"", "\\\"")
+
+        buildConfigField("String", "NEWS_API_KEY", "\"$newsApiKey\"")
         buildConfigField("String", "BASE_URL", "\"https://newsapi.org/v2/\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -45,13 +53,18 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.4"
     }
+
+//    testOptions.unitTests.all { it.useJUnitPlatform() }
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 kotlin {
     compilerOptions {
         languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0
-        // Optional: Set jvmTarget
-        // jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
     }
 }
 
@@ -69,6 +82,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -96,7 +112,19 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
-    testImplementation(libs.junit)
+    // JUnit 5 Dependencies
+    testImplementation(platform(libs.junit.bom))
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter.api)
+    testImplementation(libs.junit.jupiter.params)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockk.android)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+
+
+
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
