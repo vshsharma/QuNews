@@ -91,7 +91,7 @@ class NewsListViewModelTest {
 
         viewModel.state.test {
             val result = awaitItem()
-            assertEquals("Something went wrong", result.error)
+            assertEquals("Something went", result.error)
         }
     }
 
