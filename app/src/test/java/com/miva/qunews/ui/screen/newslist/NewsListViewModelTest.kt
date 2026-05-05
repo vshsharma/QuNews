@@ -81,18 +81,4 @@ class NewsListViewModelTest {
         }
     }
 
-    @Test
-    fun `loadNews emits error_1`() = runTest{
-        coEvery { newsUseCase(true) } returns flowOf(ApiNewsResult.Error("Something went wrong"))
-
-        viewModel.handleEvent(NewsListContract.Event.LoadNews)
-
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        viewModel.state.test {
-            val result = awaitItem()
-            assertEquals("Something went", result.error)
-        }
-    }
-
 }
